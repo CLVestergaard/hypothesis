@@ -162,7 +162,7 @@ def parse_arguments():
     parser.add_argument("--upper", type=float, default=5, help="Upper-limit of the parameter space.")
     parser.add_argument("--lower", type=float, default=-5, help="Lower-limit of the parameter space.")
     parser.add_argument("--truth", type=float, default=-4.5, help="True model parameter (theta).")
-    parser.add_argument("--theta0", type=float, default=0, help="Initial theta of the Markov chain.")
+    parser.add_argument("--theta0", type=float, default=-4.95, help="Initial theta of the Markov chain.")
     parser.add_argument("--classifier", type=str, default=None, help="Path to the classifier.")
     parser.add_argument("--force", type=bool, default=False, nargs='?', const=True, help="Force sampling.")
     arguments, _ = parser.parse_known_args()
