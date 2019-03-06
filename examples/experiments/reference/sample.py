@@ -19,7 +19,6 @@ def main(arguments):
     ref = 'w'
     if 'wo' in arguments.classifier:
         ref = 'wo'
-    classifier_index = arguments.classifier.split("/")[1].split("_")[0][3:]
     # Analytical Metropolis-Hastings.
     name = "analytical"
     path = "results/" + name
@@ -29,7 +28,7 @@ def main(arguments):
     else:
         result_analytical = hypothesis.load(path)
     # Classifier (likelihood-free) Metropolis-Hastings.
-    name = "lf-{}-reference-classifier-{}".format(ref, classifier_index)
+    name = "lf-{}-reference-classifier".format(ref)
     path = "results/" + name
     if not os.path.exists(path) or arguments.force:
         result_lf = metropolis_hastings_classifier(arguments)
@@ -52,7 +51,7 @@ def main(arguments):
     plt.axvline(arguments.truth, c='r', lw=2, linestyle='-', alpha=.95, label="Truth")
     plt.minorticks_on()
     plt.legend()
-    plt.savefig("plots/{}_reference_classifier{}.pdf".format(ref, classifier_index), bbox_inches="tight", pad_inches=0)
+    plt.savefig("plots/{}_reference_classifier.pdf".format(ref), bbox_inches="tight", pad_inches=0)
     plt.clf()
 
 def save_result(result, name):
@@ -101,7 +100,7 @@ def metropolis_hastings_analytical(arguments):
 
 
 def metropolis_hastings_classifier(arguments):
-    classifier = get_classifier(arguments)
+    classifiers = load_classifiers(arguments.classifier)
 
     # Extract the approximate likelihood-ratio from the classifier.
     def ratio(observations, theta_next, theta):
@@ -114,10 +113,19 @@ def metropolis_hastings_classifier(arguments):
             theta = theta.repeat(n).view(-1, 1)
             x = torch.cat([theta, observations], dim=1)
             x_next = torch.cat([theta_next, observations], dim=1)
-            s = classifier(x)
-            s_next = classifier(x_next)
-            lr = ((1 - s) / s).log().sum()
-            lr_next = ((1 - s_next) / s_next).log().sum()
+
+            s = torch.empty(10, 10, 1)
+            s_next = torch.empty(10, 10, 1)
+
+            for i in range(len(classifiers)):
+                s[i] = classifiers[i](x).detach()
+                s_next[i] = classifiers[i](x_next).detach()
+
+            s = s.mean(dim=0)
+            s_next = s_next.mean(dim=0)
+
+            lr = (s/(1 - s)).log().sum()
+            lr_next = (s_next/(1 - s_next)).log().sum()
             lr = (lr_next - lr).exp().item()
 
         return lr
@@ -134,12 +142,13 @@ def metropolis_hastings_classifier(arguments):
     return result
 
 
-def get_classifier(arguments):
-    path = arguments.classifier
-    classifier = torch.load(path)
-    classifier.eval()
-
-    return classifier
+def load_classifiers(ref):
+    classifiers = []
+    for i in range(1, 11):
+        classifier = torch.load("models_{}_reference/run{}_500_final.th".format(ref, i), map_location='cpu')
+        classifier.eval()
+        classifiers.append(classifier)
+    return classifiers
 
 
 def get_transition(arguments):
@@ -161,9 +170,9 @@ def parse_arguments():
     parser.add_argument("--observations", type=int, default=10, help="Number of observations.")
     parser.add_argument("--upper", type=float, default=5, help="Upper-limit of the parameter space.")
     parser.add_argument("--lower", type=float, default=-5, help="Lower-limit of the parameter space.")
-    parser.add_argument("--truth", type=float, default=-4.5, help="True model parameter (theta).")
-    parser.add_argument("--theta0", type=float, default=-4.95, help="Initial theta of the Markov chain.")
-    parser.add_argument("--classifier", type=str, default=None, help="Path to the classifier.")
+    parser.add_argument("--truth", type=float, default=5, help="True model parameter (theta).")
+    parser.add_argument("--theta0", type=float, default=-5, help="Initial theta of the Markov chain.")
+    parser.add_argument("--classifier", type=str, default="wo", help="Path to the classifier.")
     parser.add_argument("--force", type=bool, default=False, nargs='?', const=True, help="Force sampling.")
     arguments, _ = parser.parse_known_args()
     if arguments.classifier is None:

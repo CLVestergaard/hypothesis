@@ -1,13 +1,9 @@
-"""
-Trains a parameterized classifier to use with the likelihood-ratio trick.
-"""
-
+import pickle
 import argparse
 import torch
 import numpy as np
 import os
 import re
-import pickle
 
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
@@ -18,7 +14,6 @@ from torch.distributions.uniform import Uniform
 def main(arguments):
     # Data-source preperation.
     simulation_dataset = SimulationDataset()
-    reference_dataset = ReferenceDataset()
     # Training preperation.
     real = torch.ones(arguments.batch_size, 1).cuda()
     fake = torch.zeros(arguments.batch_size, 1).cuda()
@@ -30,20 +25,19 @@ def main(arguments):
 
     for epoch in range(arguments.epochs):
         simulation_loader = iter(DataLoader(simulation_dataset, num_workers=0, batch_size=arguments.batch_size))
-        reference_loader = iter(DataLoader(reference_dataset, num_workers=0, batch_size=arguments.batch_size))
         for iteration in range(iterations):
-            theta, x_theta = next(simulation_loader)
-            theta_ref, x_theta_ref = next(reference_loader)
+            theta1, x_theta1 = next(simulation_loader)
+            theta2, x_theta2 = next(simulation_loader)
 
-            theta, x_theta, theta_ref, x_theta_ref = theta.cuda(), x_theta.cuda(), theta_ref.cuda(), x_theta_ref.cuda()
+            theta1, x_theta1, theta2, x_theta2 = theta1.cuda(), x_theta1.cuda(), theta2.cuda(), x_theta2.cuda()
 
-            in_real1 = torch.cat([theta, x_theta], dim=1).detach()
-            in_fake1 = torch.cat([theta, x_theta_ref], dim=1).detach()
+            in_real1 = torch.cat([theta1, x_theta1], dim=1).detach()
+            in_fake1 = torch.cat([theta1, x_theta2], dim=1).detach()
             y_real1 = classifier(in_real1)
             y_fake1 = classifier(in_fake1)
 
-            in_real2 = torch.cat([theta_ref, x_theta_ref], dim=1).detach()
-            in_fake2 = torch.cat([theta_ref, x_theta], dim=1).detach()
+            in_real2 = torch.cat([theta2, x_theta2], dim=1).detach()
+            in_fake2 = torch.cat([theta2, x_theta1], dim=1).detach()
             y_real2 = classifier(in_real2)
             y_fake2 = classifier(in_fake2)
 
@@ -66,13 +60,12 @@ def allocate_classifier(hidden):
 
     return classifier
 
-
 class SimulationDataset(Dataset):
 
     def __init__(self):
         super(SimulationDataset, self).__init__()
 
-        with open("presimulated_datasets/simulation_dataset_short.pickle", "rb") as presimulated_file:
+        with open("presimulated_datasets/simulation_dataset_long.pickle", "rb") as presimulated_file:
             self.data = pickle.load(presimulated_file)
 
         self.size = self.data.size(0)
@@ -86,24 +79,6 @@ class SimulationDataset(Dataset):
     def __len__(self):
         return self.size
 
-class ReferenceDataset(Dataset):
-
-    def __init__(self):
-        super(ReferenceDataset, self).__init__()
-
-        with open("presimulated_datasets/reference_dataset.pickle", "rb") as presimulated_file:
-            self.data = pickle.load(presimulated_file)
-
-        self.size = self.data.size(0)
-
-    def __getitem__(self, index):
-        row = self.data[index]
-        theta, x = row[:1], row[1:]
-
-        return theta, x
-
-    def __len__(self):
-        return self.size
 
 def parse_arguments():
     parser = argparse.ArgumentParser("Likelihood-free MCMC. Training.")
@@ -124,4 +99,3 @@ def parse_arguments():
 if __name__ == "__main__":
     arguments = parse_arguments()
     main(arguments)
-
