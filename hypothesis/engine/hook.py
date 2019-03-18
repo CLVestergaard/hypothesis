@@ -59,7 +59,7 @@ def call_hook(tag, argument, **kwargs):
 
     Args:
         tag (str): the hook-identifier to call.
-        argument (object):
+        argument (object): callee
     """
     if tag in hooks.keys() and len(hooks[tag]) > 0:
         for f in hooks[tag]:
