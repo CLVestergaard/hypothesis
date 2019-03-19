@@ -13,6 +13,7 @@ class Trainer:
     Hooks:
         hypothesis.tags.checkpoint
         hypothesis.tags.epoch
+        hypothesis.tags.step
         hypothesis.tags.validate
     """
 
@@ -31,6 +32,7 @@ class Trainer:
         # Allocate the hooks.
         hypothesis.hook.add_tag("checkpoint")
         hypothesis.hook.add_tag("epoch")
+        hypothesis.hook.add_tag("step")
         hypothesis.hook.add_tag("validate")
 
     def _reset(self):
@@ -55,6 +57,7 @@ class Trainer:
         for iteration in range(num_iterations):
             try:
                 loss = self.step(loader)
+                hypothesis.hook_call(hypothesis.tags.step, self, loss=loss)
             except Exception as e:
                 hypothesis.hook_call(hypothesis.tags.exception, self, exception=e)
         # Check if the training supports checkpointing.
