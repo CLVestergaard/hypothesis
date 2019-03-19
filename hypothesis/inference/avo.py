@@ -21,7 +21,7 @@ class AdversarialVariationalOptimizationPlus(Method):
     KEY_STEPS = "steps"
 
     def __init__(self, implicit_model, discriminator, lr_discriminator=.001,
-                 lr_proposal=.01, criterion=torch.nn.BCELoss(), gamma=5):
+                 lr_proposal=.01, criterion=torch.nn.BCELoss(), gamma=10):
         super(AdversarialVariationalOptimizationPlus, self).__init__()
         self.batch_size = self.DEFAULT_BATCH_SIZE
         self.discriminator = discriminator.to(hypothesis.device)
