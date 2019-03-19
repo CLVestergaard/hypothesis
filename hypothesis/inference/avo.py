@@ -14,6 +14,9 @@ class AdversarialVariationalOptimizationPlus(Method):
     r"""Adversarial Variational Optimization (AVO) +
 
     A modified and faster implementation of arxiv.org/abs/1707.07113
+
+    Hooks:
+        hypothesis.hook.tags.step
     """
     DEFAULT_BATCH_SIZE = 32
     KEY_BATCH_SIZE = "batch_size"
@@ -83,6 +86,7 @@ class AdversarialVariationalOptimizationPlus(Method):
         inputs, outputs = self.sample_and_simulate()
         self.update_discriminator(observations, inputs, outputs)
         self.update_proposal(observations, inputs, outputs)
+        hypothesis.hook_call(hypothesis.tags.step, self)
 
     def infer(self, observations, **kwargs):
         # Fetch the desired number of optimization.

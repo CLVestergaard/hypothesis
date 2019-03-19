@@ -105,3 +105,4 @@ def clear_hook(tag=None):
 add_tag("end")
 add_tag("exception")
 add_tag("start")
+add_tag("step")
