@@ -58,7 +58,7 @@ class Chain:
     def acceptance_ratio(self):
         raise NotImplementedError
 
-    def get_chain(self, parameter_index=None, burnin=False):
+    def get(self, parameter_index=None, burnin=False):
         return self.chain[:, parameter_index].squeeze().clone()
 
     def probabilities(self):

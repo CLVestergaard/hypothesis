@@ -39,9 +39,8 @@ def add_tag(tag):
         tag (str): the name of the hook to allocate.
     """
     # Check if the tag already exists.
-    if hasattr(tags, tag):
-        raise ValueError("Tag " + tag + " already exists.")
-    setattr(tags, tag, np.random.randint(-2 ** 63, 2 ** 63))
+    if not hasattr(tags, tag):
+        setattr(tags, tag, np.random.randint(-2 ** 63, 2 ** 63))
 
 
 def remove_tag(tag):

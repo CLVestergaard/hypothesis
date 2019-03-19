@@ -22,8 +22,7 @@ def log_likelihood_ratio(classifier, observations, theta, theta_next):
         lower = classifier.lower
         upper = classifier.upper
         # Check if a lower and upper bound has been specified.
-        if lower is not None and upper is not None and
-           (theta_next < lower).any() or (theta_next > uppper).any():
+        if lower is not None and upper is not None and (theta_next < lower).any() or (theta_next > uppper).any():
             # Likelihood-ratio is 0.
             log_likelihood_ratio = torch.tensor(float("-inf"))
         else:

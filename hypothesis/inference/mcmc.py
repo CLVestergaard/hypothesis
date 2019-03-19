@@ -19,10 +19,10 @@ class MarkovChainMonteCarlo(Method):
     r"""General interface for Markov chain Monte Carlo (MCMC) samplers.
 
     Hooks:
-        hypothesis.hook.tags.start
-        hypothesis.hook.tags.pre_step
-        hypothesis.hook.tags.post_step
-        hypothesis.hook.tags.end
+        hypothesis.tags.start
+        hypothesis.tags.pre_step
+        hypothesis.tags.post_step
+        hypothesis.tags.end
     """
 
     KEY_INITIAL_THETA = "theta_0"
@@ -47,15 +47,15 @@ class MarkovChainMonteCarlo(Method):
 
         for sample_index in range(num_samples):
             # Call the pre-hook step.
-            hypothesis.hook_call(hypothesis.hook.tag.pre_step, self, theta=theta)
+            hypothesis.hook_call(hypothesis.tags.pre_step, self, theta=theta)
             # Apply the MCMC step.
             theta, probability, accepted = self.step(observations, theta)
             # Call the post-step hook.
-            hypothesis.hook_call(hypothesis.hook.tag.post_step, self,
+            hypothesis.hook_call(hypothesis.tags.post_step, self,
                                  theta=theta, probability=probability,
                                  accepted=accepted)
             with torch.no_grad():
-                samples.append(theta.squueze().cpu()) # Move sample to CPU.
+                samples.append(theta.cpu().view(-1)) # Move sample to CPU.
                 probabilities.append(probability)
                 acceptances.append(accepted)
 
@@ -77,7 +77,7 @@ class MarkovChainMonteCarlo(Method):
         burnin_acceptances = None
 
         # Call the start hook.
-        hypothesis.hook_call(hypothesis.hook.tags.start, self)
+        hypothesis.hook_call(hypothesis.tags.start, self)
         # Fetch the procedure arguments.
         theta_0 = load_argument(self.KEY_INITIAL_THETA, **kwargs)
         num_samples = load_argument(self.KEY_SAMPLES, **kwargs, default=0)
@@ -91,7 +91,7 @@ class MarkovChainMonteCarlo(Method):
         num_samples = int(num_samples)
         # Move the observations and theta_0 to the appropriate device.
         observations = observations.to(hypothesis.device)
-        theta_0 = observations.to(hypothesis.device)
+        theta_0 = theta_0.to(hypothesis.device)
         burnin_num_samples = int(burnin_num_samples)
         # Check if the burnin-chain needs to be samples.
         if burnin_num_samples > 0:
@@ -105,7 +105,7 @@ class MarkovChainMonteCarlo(Method):
         samples, probabilities, acceptances = self.sample(observations, theta_0, num_samples)
         chain_main = Chain(samples, probabilities, acceptances)
         # Call the end-hook.
-        hypothesis.hook_call(hypothesis.hook.tags.end, self)
+        hypothesis.hook_call(hypothesis.tags.end, self)
         # Check if a burnin-chain has been sampled.
         if chain_burnin is not None:
             return chain_burnin, chain_main
