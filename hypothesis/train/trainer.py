@@ -60,7 +60,7 @@ class Trainer:
             except Exception as e:
                 hypothesis.hook_call(hypothesis.tags.exception, self, exception=e)
         # Check if the training supports checkpointing.
-        hypothesis.hook_call(hypothesis.tags.checkpoint, self, model=model, epoch=epoch)
+        hypothesis.hook_call(hypothesis.tags.checkpoint, self, model=self.model, epoch=epoch)
         del loader # Free up the loader.
 
     def step(self, loader):
@@ -71,9 +71,9 @@ class Trainer:
         self._reset()
         hypothesis.hook_call(hypothesis.tags.start, self)
         # Seed the initial validation score.
-        hypothesis.hook_call(hypothesis.tags.validate, self, model=model, epoch=-1)
+        hypothesis.hook_call(hypothesis.tags.validate, self, model=self.model, epoch=-1)
         # Start the training procedure.
         for epoch in range(self.epochs):
             self.epoch(epoch)
-            hypothesis.hook_call(hypothesis.tags.validate, self, model=model, epoch=epoch)
+            hypothesis.hook_call(hypothesis.tags.validate, self, model=self.model, epoch=epoch)
         hypothesis.hook_call(hypothesis.tags.end, self)
