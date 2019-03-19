@@ -88,9 +88,11 @@ class MarkovChainMonteCarlo(Method):
         # Check if the number of MCMC samples has been specified.
         if num_samples is None:
             raise ValueError("Number of MCMC samples has not been specified.")
+        num_samples = int(num_samples)
         # Move the observations and theta_0 to the appropriate device.
         observations = observations.to(hypothesis.device)
         theta_0 = observations.to(hypothesis.device)
+        burnin_num_samples = int(burnin_num_samples)
         # Check if the burnin-chain needs to be samples.
         if burnin_num_samples > 0:
             # Sample the burnin chain.

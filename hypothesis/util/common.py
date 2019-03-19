@@ -6,6 +6,21 @@ import torch
 
 
 
+def sample(x, num_samples):
+    r"""Samples the specified number of samples from `x`.
+
+    Args:
+        x (tensor): the tensor to sample from.
+        num_samples (int): the number of rows to sample.
+    """
+    with torch.no_grad():
+        n = x.size(0)
+        indices = torch.tensor(np.random.randint(0, n, num_samples))
+        samples = x[indices]
+
+    return samples
+
+
 def load_argument(key, default=None, **kwargs):
     r"""Loads the specified keys from kwargs.
 
