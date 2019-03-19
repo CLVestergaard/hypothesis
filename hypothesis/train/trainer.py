@@ -69,7 +69,7 @@ class Trainer:
         self._reset()
         hypothesis.hook_call(hypothesis.tags.start, self)
         # Seed the initial validation score.
-        self._validate()
+        hypothesis.hook_call(hypothesis.tags.validate, self, model=model, epoch=-1)
         # Start the training procedure.
         for epoch in range(self.epochs):
             self.epoch(epoch)
