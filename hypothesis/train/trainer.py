@@ -52,7 +52,7 @@ class Trainer:
         self.scheduler_step()
         loader = iter(DataLoader(self.dataset, num_workers=self.data_workers,
             batch_size=self.batch_size, pin_memory=self.pin_memory, shuffle=self.shuffle))
-        num_iterations = len(dataset)
+        num_iterations = len(self.dataset)
         for iteration in range(num_iterations):
             try:
                 loss = self.step(loader)

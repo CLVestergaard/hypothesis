@@ -19,5 +19,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 from .engine import hook
 from .engine.hook import call_hook as hook_call
 from .engine.hook import clear_hook as hook_clear
+from .engine.hook import clear_hook as hooks_clear()
 from .engine.hook import register_hook as hook_register
 from .engine.hook import tags
