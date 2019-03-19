@@ -1,2 +1,2 @@
-from parameterized_classifier import AbstractParameterizedClassifier
-from parameterized_classifier import ParameterizedClassifier
+from hypothesis.nn.parameterized_classifier import AbstractParameterizedClassifier
+from hypothesis.nn.parameterized_classifier import ParameterizedClassifier
