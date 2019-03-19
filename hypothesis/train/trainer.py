@@ -23,7 +23,6 @@ class Trainer:
         self.allocate_optimizer = allocate_optimizer
         self.allocate_scheduler = allocate_scheduler
         self.batch_size = batch_size
-        self.checkpoint = checkpoint
         self.data_workers = data_workers
         self.dataset = dataset
         self.epochs = epochs
