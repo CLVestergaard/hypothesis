@@ -34,7 +34,8 @@ class NPZDataset(Dataset):
         self.block_names = self._fetch_block_names()
         # Main dataset properties.
         self.num_blocks = self._inspect_num_blocks()
-        self.block_elements = self.num_blocks * self._inspect_block_elements()
+        self.block_elements = self._inspect_block_elements()
+        self.size = self.num_blocks * self.block_elements
         # Buffer block.
         self.buffer_block_index = 0
         self.buffer_block = self._load_block(0)
@@ -62,12 +63,13 @@ class NPZDataset(Dataset):
         # Load the requested data from the buffer.
         data_index = index % self.block_elements
         inputs = self.buffer_block[self.key_inputs][data_index]
-        outputs = self.buffer_block[self.key_inputs][data_index]
+        outputs = self.buffer_block[self.key_outputs][data_index]
 
         return inputs, outputs
 
     def __len__(self):
         return self.size
+
 
 
 class GeneratorDataset(Dataset):
