@@ -59,8 +59,8 @@ class Trainer:
                 hypothesis.hook_call(hypothesis.tags.step, self, loss=loss)
             except Exception as e:
                 hypothesis.hook_call(hypothesis.tags.exception, self, exception=e)
-        # Check if the training supports checkpointing.
         hypothesis.hook_call(hypothesis.tags.checkpoint, self, model=self.model, epoch=epoch)
+        hypothesis.hook_call(hypothesis.tags.epoch, self, epoch=epoch)
         del loader # Free up the loader.
 
     def step(self, loader):
