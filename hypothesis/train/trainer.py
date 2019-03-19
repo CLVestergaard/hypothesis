@@ -17,7 +17,7 @@ class Trainer:
     """
 
     def __init__(self, dataset, allocate_optimizer, epochs=1, data_workers=2,
-                 batch_size=32, validate=None, allocate_scheduler=None,
+                 batch_size=32, allocate_scheduler=None,
                  pin_memory=False, shuffle=False):
         self.allocate_optimizer = allocate_optimizer
         self.allocate_scheduler = allocate_scheduler
@@ -28,16 +28,10 @@ class Trainer:
         self.epochs = epochs
         self.pin_memory = pin_memory
         self.shuffle = shuffle
-        self.validate = validate
         # Allocate the hooks.
         hypothesis.hook.add_tag("checkpoint")
         hypothesis.hook.add_tag("epoch")
         hypothesis.hook.add_tag("validate")
-
-    def _validate(self):
-        if self.validate is not none:
-            validation_resolut = self.validate()
-            hypothesis.hook_call(hypothesis.tags.validate, self, result=validation_result)
 
     def _reset(self):
         if self.allocate_optimizer is not None:
@@ -79,5 +73,5 @@ class Trainer:
         # Start the training procedure.
         for epoch in range(self.epochs):
             self.epoch(epoch)
-            self._validate()
+            hypothesis.hook_call(hypothesis.tags.validate, self, model=model, epoch=epoch)
         hypothesis.hook_call(hypothesis.tags.end, self)
