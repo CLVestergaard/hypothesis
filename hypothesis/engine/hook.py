@@ -102,5 +102,6 @@ def clear_hook(tag=None):
 
 
 """Add default Hypothesis hook-tags."""
-add_tag("start")
 add_tag("end")
+add_tag("exception")
+add_tag("start")
