@@ -47,11 +47,11 @@ class MarkovChainMonteCarlo(Method):
 
         for sample_index in range(num_samples):
             # Call the pre-hook step.
-            hypothesis.call_hook(hypothesis.hook.tag.pre_step, self, theta=theta)
+            hypothesis.hook_call(hypothesis.hook.tag.pre_step, self, theta=theta)
             # Apply the MCMC step.
             theta, probability, accepted = self.step(observations, theta)
             # Call the post-step hook.
-            hypothesis.call_hook(hypothesis.hook.tag.post_step, self,
+            hypothesis.hook_call(hypothesis.hook.tag.post_step, self,
                                  theta=theta, probability=probability,
                                  accepted=accepted)
             with torch.no_grad():
@@ -77,7 +77,7 @@ class MarkovChainMonteCarlo(Method):
         burnin_acceptances = None
 
         # Call the start hook.
-        hypothesis.call_hook(hypothesis.hook.tags.start, self)
+        hypothesis.hook_call(hypothesis.hook.tags.start, self)
         # Fetch the procedure arguments.
         theta_0 = load_argument(self.KEY_INITIAL_THETA, **kwargs)
         num_samples = load_argument(self.KEY_SAMPLES, **kwargs, default=0)
@@ -103,7 +103,7 @@ class MarkovChainMonteCarlo(Method):
         samples, probabilities, acceptances = self.sample(observations, theta_0, num_samples)
         chain_main = Chain(samples, probabilities, acceptances)
         # Call the end-hook.
-        hypothesis.call_hook(hypothesis.hook.tags.end, self)
+        hypothesis.hook_call(hypothesis.hook.tags.end, self)
         # Check if a burnin-chain has been sampled.
         if chain_burnin is not None:
             return chain_burnin, chain_main

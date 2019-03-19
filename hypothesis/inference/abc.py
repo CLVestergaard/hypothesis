@@ -40,7 +40,7 @@ class ApproximateBayesianComputation(Method):
             try:
                 outputs = self.model(inputs)
             except Exception as e:
-                hypothesis.call_hooks(hypothesis.hook.tags.exception, self, exception=e)
+                hypothesis.hook_call(hypothesis.hook.tags.exception, self, exception=e)
                 continue
             summary_outputs = self.summary(outputs)
             distance = self.distance(self.summary_observations, summary_outputs)

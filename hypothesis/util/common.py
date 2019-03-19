@@ -6,7 +6,7 @@ import torch
 
 
 
-def load_argument(key, **kwargs, default=None):
+def load_argument(key, default=None, **kwargs):
     r"""Loads the specified keys from kwargs.
 
     This procedure returns 'None' when the key or its

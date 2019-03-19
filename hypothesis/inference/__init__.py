@@ -1,1 +1,1 @@
-from base import Method
+from hypothesis.inference.base import Method
