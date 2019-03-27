@@ -13,63 +13,79 @@ from torch.utils.data import Dataset
 
 
 
-class NPZDataset(Dataset):
-    r"""Dataset accepting npz data arrays.
+class NPSimulationDataset(Dataset):
+    r"""Dataset accepting a single numpy data array.
 
     Args:
-        path (str): the path to the npz dataset.
-        inputs (str, optional): key for the model parameters (default: 'inputs')
-        outputs (str, optional): key of the generated observations (default: 'outputs')
+        path (str): the path to the np data file.
+        inputs (str, optional): key for the model parameters (default: 'inputs').
+        outputs (str, optional): key for the generated observations (default: 'outputs').
+        memmap (bool, optional): memory-maps the datafile (default: False).
     """
 
-    def __init__(self, path, inputs="inputs", outputs="outputs"):
-        super(NPZDataset, self).__init__()
+    def __init__(self, path, inputs="inputs", outputs="outputs", memmap=False):
+        super(NPSimulationDataset, self).__init__()
         # Check if the specified path exists.
-        if not os.path.exists(path) and os.path.isdir(path):
-            raise ValueError("Please specify a path to the NPZ directory.")
+        if not os.path.exists(path):
+            raise ValueError("Please specifiy a path to numpy data file.")
         # Basic dataset parameters.
-        self.base = path
+        self.path = path
         self.key_inputs = inputs
         self.key_outputs = outputs
-        self.block_names = self._fetch_block_names()
-        # Main dataset properties.
-        self.num_blocks = self._inspect_num_blocks()
-        self.block_elements = self._inspect_block_elements()
-        self.size = self.num_blocks * self.block_elements
-        # Buffer block.
-        self.buffer_block_index = 0
-        self.buffer_block = self._load_block(0)
-
-    def _fetch_block_names(self):
-        return os.listdir(self.base)
-
-    def _inspect_num_blocks(self):
-        return len(glob.glob(self.base + "/*.npz"))
-
-    def _inspect_block_elements(self):
-        data = np.load(self.base + "/" + self.block_names[-1])
-        return len(data[self.key_inputs])
-
-    def _load_block(self, block_index):
-        data = np.load(self.base + "/" + self.block_names[block_index])
-
-        return data
+        # Set the memory-mapping argument.
+        if memmap:
+            memmap_mode = 'r' # Read-only.
+        else:
+            memmap_mode = None
+        # Load the data-file.
+        self.data = np.load(self.path, mmap_mode=memmap_mode)
 
     def __getitem__(self, index):
-        # Check if the block is buffered in memory.
-        block_index = int(index / self.block_elements)
-        if block_index != self.buffer_block_index:
-            self.buffer_block = self._load_block(block_index)
-        # Load the requested data from the buffer.
-        data_index = index % self.block_elements
-        inputs = self.buffer_block[self.key_inputs][data_index]
-        outputs = self.buffer_block[self.key_outputs][data_index]
+        inputs = self.data[self.key_inputs][index]
+        outputs = self.data[self.key_outputs][index]
 
-        return inputs, outputs
+        return torch.tensor(inputs), torch.tensor(outputs)
 
     def __len__(self):
-        return self.size
+        return len(self.data[self.key_inputs])
 
+
+class NPSplittedSimulationDataset(Dataset):
+    r"""Dataset accepting a a numpy data array for model parameters and associated observations.
+
+    Args:
+        path_inputs (str): the np-datafile with the inputs.
+        path_outputs (str): the np-datafile with the outputs.
+        memmap_inputs (bool, optional): memory-maps the inputs datafile (default: False).
+        memmap_outputs (bool, optional): memory-maps the outputs datafile (default: True).
+    """
+
+    def __init__(self, path_inputs, path_outputs, memmap_inputs=False, memmap_outputs=False):
+        super(NPSplittedSimulationDataset, self).__init__()
+        # Check if the specified paths exist.
+        if not os.path.exists(path_inputs) or not os.path.exists(path_outputs):
+            raise ValueError("Please specify a path to a inputs and outputs numpy data file.")
+        # Set the memory-mapping arguments.
+        if memmap_inputs:
+            memmap_inputs = 'r' # Read-only
+        else:
+            memmap_inputs = None
+        if memmap_outputs:
+            memmap_outputs = 'r' # Read-only.
+        else:
+            memmap_outputs = None
+        # Load the associated datafiles.
+        self.data_inputs = np.load(path_inputs, mmap_mode=memmap_inputs)
+        self.data_outputs = np.load(path_outputs, mmap_mode=memmap_outputs)
+
+    def __getitem__(self, index):
+        inputs = self.data_inputs[index]
+        outputs = self.data_outputs[index]
+
+        return torch.tensor(inputs), torch.tensor(outputs)
+
+    def __len__(self):
+        return len(self.data_inputs)
 
 
 class GeneratorDataset(Dataset):
