@@ -19,8 +19,8 @@ class Trainer:
     def __init__(self, dataset, allocate_optimizer, epochs=1, data_workers=2,
                  batch_size=32, allocate_scheduler=None,
                  pin_memory=False, shuffle=False):
-        self.allocate_optimizer = allocate_optimizer
-        self.allocate_scheduler = allocate_scheduler
+        self.optimizer = allocate_optimizer
+        self.scheduler = allocate_scheduler
         self.batch_size = batch_size
         self.data_workers = data_workers
         self.dataset = dataset
@@ -31,16 +31,6 @@ class Trainer:
         hypothesis.hook.add_tag("epoch")
         hypothesis.hook.add_tag("step")
         hypothesis.hook.add_tag("validate")
-
-    def _reset(self):
-        if self.allocate_optimizer is not None:
-            self.optimizer = self.allocate_optimizer(self.model)
-        else:
-            self.optimizer = None
-        if self.allocate_scheduler is not None:
-            self.scheduler = self.allocate_scheduler(self.optimizer)
-        else:
-            self.scheduler = None
 
     def scheduler_step(self):
         if self.scheduler is not None:
@@ -65,7 +55,6 @@ class Trainer:
 
     def train(self, model):
         self.model = model
-        self._reset()
         hypothesis.hook_call(hypothesis.tags.start, self)
         # Seed the initial validation score.
         hypothesis.hook_call(hypothesis.tags.validate, self, model=self.model, epoch=-1)
