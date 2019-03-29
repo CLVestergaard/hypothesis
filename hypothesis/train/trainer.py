@@ -11,7 +11,6 @@ class Trainer:
     Args:
         ....
     Hooks:
-        hypothesis.tags.checkpoint
         hypothesis.tags.epoch
         hypothesis.tags.step
         hypothesis.tags.validate
@@ -29,7 +28,6 @@ class Trainer:
         self.pin_memory = pin_memory
         self.shuffle = shuffle
         # Allocate the hooks.
-        hypothesis.hook.add_tag("checkpoint")
         hypothesis.hook.add_tag("epoch")
         hypothesis.hook.add_tag("step")
         hypothesis.hook.add_tag("validate")
@@ -59,8 +57,7 @@ class Trainer:
                 hypothesis.hook_call(hypothesis.tags.step, self, loss=loss)
             except Exception as e:
                 hypothesis.hook_call(hypothesis.tags.exception, self, exception=e)
-        hypothesis.hook_call(hypothesis.tags.checkpoint, self, model=self.model, epoch=epoch)
-        hypothesis.hook_call(hypothesis.tags.epoch, self, epoch=epoch)
+        hypothesis.hook_call(hypothesis.tags.epoch, self, model=model, epoch=epoch)
         del loader # Free up the loader.
 
     def step(self, loader):
