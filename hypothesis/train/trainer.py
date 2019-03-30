@@ -16,16 +16,17 @@ class Trainer:
         hypothesis.tags.validate
     """
 
-    def __init__(self, dataset, allocate_optimizer, epochs=1, data_workers=2,
-                 batch_size=32, allocate_scheduler=None,
+    def __init__(self, model, dataset, optimizer, epochs=1,
+                 data_workers=2, batch_size=32, scheduler=None,
                  pin_memory=False, shuffle=False):
-        self.optimizer = allocate_optimizer
-        self.scheduler = allocate_scheduler
         self.batch_size = batch_size
         self.data_workers = data_workers
         self.dataset = dataset
         self.epochs = epochs
+        self.model = model
+        self.optimizer = optimizer
         self.pin_memory = pin_memory
+        self.scheduler = scheduler
         self.shuffle = shuffle
         # Allocate the hooks.
         hypothesis.hook.add_tag("epoch")
@@ -53,8 +54,7 @@ class Trainer:
     def step(self, loader):
         raise NotImplementedError
 
-    def train(self, model):
-        self.model = model
+    def train(self):
         hypothesis.hook_call(hypothesis.tags.start, self)
         # Seed the initial validation score.
         hypothesis.hook_call(hypothesis.tags.validate, self, model=self.model, epoch=-1)

@@ -14,12 +14,12 @@ class ParameterizedClassifierTrainer(Trainer):
         ...
     """
 
-    def __init__(self, dataset, optimizer, epochs=1, data_workers=2,
+    def __init__(self, model, dataset, optimizer, epochs=1, data_workers=2,
                  batch_size=32, scheduler= None, pin_memory=False,
                  shuffle=False, criterion=torch.nn.BCELoss(reduction="sum")):
         # Initialize the parent object.
         super(ParameterizedClassifierTrainer, self).__init__(
-            dataset, allocate_optimizer, epochs, data_workers,
+            model, dataset, allocate_optimizer, epochs, data_workers,
             batch_size, allocate_scheduler, pin_memory)
         # Set the number of epoch iterations.
         self.epoch_iterations = int(len(dataset) / batch_size / 2)
