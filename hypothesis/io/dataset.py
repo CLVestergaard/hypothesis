@@ -24,7 +24,7 @@ class NPSimulationDataset(Dataset):
     """
 
     def __init__(self, path_inputs, path_outputs, memmap_inputs=False, memmap_outputs=False):
-        super(NPSplittedSimulationDataset, self).__init__()
+        super(NPSimulationDataset, self).__init__()
         # Check if the specified paths exist.
         if not os.path.exists(path_inputs) or not os.path.exists(path_outputs):
             raise ValueError("Please specify a path to a inputs and outputs numpy data file.")
