@@ -14,43 +14,6 @@ from torch.utils.data import Dataset
 
 
 class NPSimulationDataset(Dataset):
-    r"""Dataset accepting a single numpy data array.
-
-    Args:
-        path (str): the path to the np data file.
-        inputs (str, optional): key for the model parameters (default: 'inputs').
-        outputs (str, optional): key for the generated observations (default: 'outputs').
-        memmap (bool, optional): memory-maps the datafile (default: False).
-    """
-
-    def __init__(self, path, inputs="inputs", outputs="outputs", memmap=False):
-        super(NPSimulationDataset, self).__init__()
-        # Check if the specified path exists.
-        if not os.path.exists(path):
-            raise ValueError("Please specifiy a path to numpy data file.")
-        # Basic dataset parameters.
-        self.path = path
-        self.key_inputs = inputs
-        self.key_outputs = outputs
-        # Set the memory-mapping argument.
-        if memmap:
-            memmap_mode = 'r' # Read-only.
-        else:
-            memmap_mode = None
-        # Load the data-file.
-        self.data = np.load(self.path, mmap_mode=memmap_mode)
-
-    def __getitem__(self, index):
-        inputs = self.data[self.key_inputs][index]
-        outputs = self.data[self.key_outputs][index]
-
-        return torch.tensor(inputs), torch.tensor(outputs)
-
-    def __len__(self):
-        return len(self.data[self.key_inputs])
-
-
-class NPSplittedSimulationDataset(Dataset):
     r"""Dataset accepting a a numpy data array for model parameters and associated observations.
 
     Args:
