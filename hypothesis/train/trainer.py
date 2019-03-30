@@ -48,7 +48,7 @@ class Trainer:
                 hypothesis.hook_call(hypothesis.tags.step, self, loss=loss)
             except Exception as e:
                 hypothesis.hook_call(hypothesis.tags.exception, self, exception=e)
-        hypothesis.hook_call(hypothesis.tags.epoch, self, model=model, epoch=epoch)
+        hypothesis.hook_call(hypothesis.tags.epoch, self, model=self.model, epoch=epoch)
         del loader # Free up the loader.
 
     def step(self, loader):
