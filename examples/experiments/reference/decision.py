@@ -91,7 +91,7 @@ def main():
             ax1.fill_between(x_range, y_min, y_max, color='black', alpha=.25)
             ax1.set_ylim(bottom=0)
             ax1.plot(x_range, y_means, color="black")
-            ax1.axvline(5, c='C0', lw=2, linestyle='-.', alpha=.95)
+            ax1.axvline(5, c='C0', lw=2, linestyle='-', alpha=.95)
             ax1.set_ylabel(r'$s(x, \theta)$')
             ax1.set_xlabel(r'$\theta$')
 
@@ -110,7 +110,7 @@ def main():
             ax2.fill_between(x_range, y_min, y_max, color='black', alpha=.25)
             ax2.set_ylim(bottom=0)
             ax2.plot(x_range, y_means, color="black")
-            ax2.axvline(5, c='C0', lw=2, linestyle='-.', alpha=.95)
+            ax2.axvline(5, c='C0', lw=2, linestyle='-', alpha=.95)
             #ax2.set_ylabel(r'$s(x, \theta)$')
             ax2.set_xlabel(r'$\theta$')
 
