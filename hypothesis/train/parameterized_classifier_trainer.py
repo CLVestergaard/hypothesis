@@ -37,7 +37,7 @@ class ParameterizedClassifierTrainer(Trainer):
         if not self.has_targets:
             n /= 2
 
-        return n
+        return int(n)
 
     def _step_with_targets(self, loader):
         thetas, x_thetas, targets = next(loader)

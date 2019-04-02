@@ -34,7 +34,7 @@ class Trainer:
         hypothesis.hook.add_tag("validate")
 
     def dataset_iterations(self):
-        return len(self.dataset) // self.batch_size
+        return int(len(self.dataset) // self.batch_size)
 
     def scheduler_step(self):
         if self.scheduler is not None:
