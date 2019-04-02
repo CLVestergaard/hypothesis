@@ -33,6 +33,9 @@ class Trainer:
         hypothesis.hook.add_tag("step")
         hypothesis.hook.add_tag("validate")
 
+    def dataset_iterations(self):
+        return len(self.dataset) // self.batch_size
+
     def scheduler_step(self):
         if self.scheduler is not None:
             self.scheduler.step()
@@ -41,7 +44,7 @@ class Trainer:
         self.scheduler_step()
         loader = iter(DataLoader(self.dataset, num_workers=self.data_workers,
             batch_size=self.batch_size, pin_memory=self.pin_memory, shuffle=self.shuffle))
-        num_iterations = len(self.dataset)
+        num_iterations = self.dataset_iterations()
         for iteration in range(num_iterations):
             try:
                 loss = self.step(loader)

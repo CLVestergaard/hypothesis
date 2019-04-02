@@ -23,7 +23,9 @@ class NPSimulationDataset(Dataset):
         memmap_outputs (bool, optional): memory-maps the outputs datafile (default: True).
     """
 
-    def __init__(self, path_inputs, path_outputs, memmap_inputs=False, memmap_outputs=False):
+    def __init__(self, path_inputs, path_outputs, path_targets=None,
+                 memmap_inputs=False, memmap_outputs=True, memmap_targets=False,
+                 transform_inputs=None, transform_outputs=None, transform_targets=None):
         super(NPSimulationDataset, self).__init__()
         # Check if the specified paths exist.
         if not os.path.exists(path_inputs) or not os.path.exists(path_outputs):
@@ -37,15 +39,36 @@ class NPSimulationDataset(Dataset):
             memmap_outputs = 'r' # Read-only.
         else:
             memmap_outputs = None
+        if memmap_targets:
+            memmap_targets = 'r' # Read-only
+        else:
+            memmap_targets = none
         # Load the associated datafiles.
         self.data_inputs = np.load(path_inputs, mmap_mode=memmap_inputs)
         self.data_outputs = np.load(path_outputs, mmap_mode=memmap_outputs)
+        if path_targets is not None:
+            self.data_targets = np.load(path_targets, mmap_mode=memmap_targets)
+        else:
+            self.data_targets = None
+        # Set the transforms.
+        self.transform_inputs = transfrom_inputs
+        self.transform_outputs = transform_outputs
+        self.transform_targets = transform_targets
 
     def __getitem__(self, index):
+        # Load the inputs.
         inputs = self.data_inputs[index]
+        if self.transform_inputs is not None:
+            inputs = self.transform_inputs(inputs)
         outputs = self.data_outputs[index]
-
-        return torch.tensor(inputs), torch.tensor(outputs)
+        if self.transform_outputs is not None:
+            outputs = self.data_outputs[index]
+        if data_targets is not None:
+            targets = self.data_targets[index]
+            if self.transform_targets is not None:
+                targets = self.transform_targets(targets)
+            return inputs, outputs, targets
+        return inputs, outputs
 
     def __len__(self):
         return len(self.data_inputs)
