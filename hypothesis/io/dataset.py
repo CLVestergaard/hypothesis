@@ -51,7 +51,7 @@ class NPSimulationDataset(Dataset):
         else:
             self.data_targets = None
         # Set the transforms.
-        self.transform_inputs = transfrom_inputs
+        self.transform_inputs = transform_inputs
         self.transform_outputs = transform_outputs
         self.transform_targets = transform_targets
 
