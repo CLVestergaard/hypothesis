@@ -42,7 +42,7 @@ class NPSimulationDataset(Dataset):
         if memmap_targets:
             memmap_targets = 'r' # Read-only
         else:
-            memmap_targets = none
+            memmap_targets = None
         # Load the associated datafiles.
         self.data_inputs = np.load(path_inputs, mmap_mode=memmap_inputs)
         self.data_outputs = np.load(path_outputs, mmap_mode=memmap_outputs)
