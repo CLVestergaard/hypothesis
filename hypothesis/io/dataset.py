@@ -63,7 +63,7 @@ class NPSimulationDataset(Dataset):
         outputs = self.data_outputs[index]
         if self.transform_outputs is not None:
             outputs = self.data_outputs[index]
-        if data_targets is not None:
+        if self.data_targets is not None:
             targets = self.data_targets[index]
             if self.transform_targets is not None:
                 targets = self.transform_targets(targets)
