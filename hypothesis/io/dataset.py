@@ -24,8 +24,7 @@ class NPSimulationDataset(Dataset):
     """
 
     def __init__(self, path_inputs, path_outputs, path_targets=None,
-                 memmap_inputs=False, memmap_outputs=True, memmap_targets=False,
-                 transform_inputs=None, transform_outputs=None, transform_targets=None):
+                 memmap_inputs=False, memmap_outputs=True, memmap_targets=False):
         super(NPSimulationDataset, self).__init__()
         # Check if the specified paths exist.
         if not os.path.exists(path_inputs) or not os.path.exists(path_outputs):
@@ -50,23 +49,13 @@ class NPSimulationDataset(Dataset):
             self.data_targets = np.load(path_targets, mmap_mode=memmap_targets)
         else:
             self.data_targets = None
-        # Set the transforms.
-        self.transform_inputs = transform_inputs
-        self.transform_outputs = transform_outputs
-        self.transform_targets = transform_targets
 
     def __getitem__(self, index):
         # Load the inputs.
-        inputs = self.data_inputs[index]
-        if self.transform_inputs is not None:
-            inputs = self.transform_inputs(inputs)
-        outputs = self.data_outputs[index]
-        if self.transform_outputs is not None:
-            outputs = self.data_outputs[index]
+        inputs = torch.tensor(self.data_inputs[index]).float()
+        outputs = torch.tensor(self.data_outputs[index]).float()
         if self.data_targets is not None:
-            targets = self.data_targets[index]
-            if self.transform_targets is not None:
-                targets = self.transform_targets(targets)
+            targets = torch.tensor(self.data_targets[index]).float().view(-1)
             return inputs, outputs, targets
         return inputs, outputs
 
