@@ -16,7 +16,7 @@ class ParameterizedClassifierTrainer(Trainer):
 
     def __init__(self, model, dataset, optimizer, epochs=1, data_workers=2,
                  batch_size=32, scheduler= None, pin_memory=False, shuffle=False,
-                 criterion=torch.nn.BCELoss(reduction="sum")):
+                 criterion=torch.nn.BCELoss(reduction="mean")):
         # Initialize the parent object.
         super(ParameterizedClassifierTrainer, self).__init__(
             model, dataset, optimizer, epochs, data_workers,
@@ -24,7 +24,7 @@ class ParameterizedClassifierTrainer(Trainer):
         # Set the number of epoch iterations.
         self.epoch_iterations = int(len(dataset) / batch_size / 2)
         self.criterion = criterion.to(hypothesis.device)
-        self.has_targets = (len(self.dataset[0]) > 0)
+        self.has_targets = (len(self.dataset[0]) > 2)
         if not self.has_targets:
             self.zeros = torch.zeros(self.batch_size, 1).to(hypothesis.device)
             self.ones = torch.ones(self.batch_size, 1).to(hypothesis.device)
