@@ -146,7 +146,7 @@ class ParameterizedClassifierEnsemble(AbstractParameterizedClassifier):
     def log_likelihood_to_evidence_ratio(self, observations, theta):
         ratios = []
         for classifier in self.classifiers:
-            ratios.append(classifier.evidence_ratio(observations, theta))
+            ratios.append(classifier.log_likelihood_to_evidence_ratio(observations, theta).view(-1))
         ratios = torch.cat(ratios, dim=0)
 
         return ratios.mean().squeeze()
