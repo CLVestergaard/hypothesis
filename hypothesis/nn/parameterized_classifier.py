@@ -51,7 +51,7 @@ class AbstractParameterizedClassifier(torch.nn.Module):
         """
         return self.lower is not None and self.upper is not None
 
-    def grad_log_likelihood(self, observations, theta, reduction="mean"):
+    def grad_log_likelihood(self, observations, theta):
         r"""Returns the gradient of the log likelihood with respect
         to the model parameter theta.
 
@@ -74,14 +74,25 @@ class AbstractParameterizedClassifier(torch.nn.Module):
 
         return gradient
 
-    def likelihood_to_evidence_ratio(self, observations, theta):
-        r"""Computes p(x|theta) / p(x) for the specified observations.
+    def log_likelihood_to_evidence_ratio(self, observations, theta):
+        r"""Computes log p(x|theta) / p(x) for the specified observations.
 
         Args:
             observations (tensor): set of observations.
             theta (tensor): model parameter.
         """
-        return likelihood_to_evidence_ratio(self, observations, theta)
+        n = observations.size(0)
+        thetas = theta.repeat(n)
+        return likelihood_to_evidence_ratio(self, observations, thetas).log().sum()
+
+    def likelihood_to_evidence_ratio(self, observations, theta):
+        r"""Computes log p(x|theta) / p(x) for the specified observations.
+
+        Args:
+            observations (tensor): set of observations.
+            theta (tensor): model parameter.
+        """
+        return (-self.log_likelihood_to_evidence_ratio(observations, theta)).exp()
 
     def log_likelihood_ratio(self, observations, theta, theta_next):
         r"""Computes p(x|theta_next) / p(x|theta) for the
@@ -113,7 +124,7 @@ class ParameterizedClassifier(AbstractParameterizedClassifier):
         num_observations = observations.size(0)
         observations = observations.view(num_observations, -1)
         thetas = thetas.view(num_observations, -1)
-        inputs = torch.cat([observations, thetas])
+        inputs = torch.cat([observations, thetas], dim=1)
 
         return self.classifier(inputs)
 
@@ -132,7 +143,7 @@ class ParameterizedClassifierEnsemble(AbstractParameterizedClassifier):
 
         return gradients
 
-    def likelihood_to_evidence_ratio(self, observations, theta):
+    def log_likelihood_to_evidence_ratio(self, observations, theta):
         ratios = []
         for classifier in self.classifiers:
             ratios.append(classifier.evidence_ratio(observations, theta))

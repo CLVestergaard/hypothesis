@@ -44,6 +44,7 @@ def likelihood_to_evidence_ratio(classifier, observations, thetas):
     observations and model parameters.
     """
     outputs = classifier(observations, thetas)
-    ratios = ((1 - outputs) / (outputs + epsilon))
+    # ratios = ((1 - outputs) / (outputs + epsilon))
+    ratios = outputs / (1 - outputs)
 
     return ratios
