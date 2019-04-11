@@ -135,6 +135,19 @@ class ParameterizedClassifierEnsemble(AbstractParameterizedClassifier):
         super(ParameterizedClassifierEnsemble, self).__init__(lower, upper)
         self.classifiers = classifiers
 
+    def variances(self, observations, thetas):
+        with torch.no_grad():
+            variances = []
+            n = observations.size(0)
+            for theta in thetas:
+                parameters = theta.repeat(n)
+                y = -self.log_likelihood_to_evidence_ratio_all(observations, theta).view(1, -1)
+                variances.append(y.exp())
+            variances = torch.cat(variances, dim=0)
+            variances = variances.std(dim=1).pow(2)
+
+        return variances
+
     def grad_log_likelihood(self, observations, theta):
         gradients = []
         for classifier in self.classifiers:
@@ -144,12 +157,15 @@ class ParameterizedClassifierEnsemble(AbstractParameterizedClassifier):
         return gradients
 
     def log_likelihood_to_evidence_ratio(self, observations, theta):
+        return self.log_likelihood_to_evidence_ratio_all(observations, theta).mean().squeeze()
+
+    def log_likelihood_to_evidence_ratio_all(self, observations, theta):
         ratios = []
         for classifier in self.classifiers:
             ratios.append(classifier.log_likelihood_to_evidence_ratio(observations, theta).view(-1))
         ratios = torch.cat(ratios, dim=0)
 
-        return ratios.mean().squeeze()
+        return ratios
 
     def log_likelihood_ratio(self, observations, theta, theta_next):
         ratios = []
@@ -159,12 +175,14 @@ class ParameterizedClassifierEnsemble(AbstractParameterizedClassifier):
 
         return ratios.mean().squeeze()
 
-    def forward(self, observations, thetas):
+    def forward_all(self, observations, thetas):
         outputs = []
-
-        # Average the classifier output.
         for classifier in self.classifiers:
             outputs.append(classifier(observations, thetas))
-        output = torch.cat(outputs, dim=0).mean(dim=0)
+        outputs = torch.cat(outputs, dim=0)
 
-        return output
+        return outputs
+
+
+    def forward(self, observations, thetas):
+        return self.forward_all(observations, thetas).mean(dim=0)
